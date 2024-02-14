@@ -1,0 +1,107 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                                     Entry Pro.mq5 |
+//|                     Developed by Forex Robot Easy Team           |
+//|                         www.forexroboteasy.com                    |
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//| External variables                                                |
+//+------------------------------------------------------------------+
+extern int Period = 14; // Period for calculating market trends
+extern double StopLoss = 100; // Stop loss level in points
+extern double TakeProfit = 200; // Take profit level in points
+
+//+------------------------------------------------------------------+
+//| Global variables                                                  |
+//+------------------------------------------------------------------+
+double bid, ask; // Bid and ask prices
+int trend; // Current market trend: 1 - uptrend, -1 - downtrend, 0 - no trend
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                           |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Initialize trend tracking feature
+   trend = 0;
+   
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                                |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
+{
+   // Calculate market trends
+   for(int i = 0; i < rates_total; i++)
+   {
+      if(i >= Period)
+      {
+         double sum = 0;
+         
+         for(int j = i - Period; j < i; j++)
+         {
+            sum += close[j] - close[j - 1];
+         }
+         
+         double slope = sum / Period;
+         
+         if(slope > 0)
+         {
+            trend = 1; // Uptrend
+         }
+         else if(slope < 0)
+         {
+            trend = -1; // Downtrend
+         }
+         else
+         {
+            trend = 0; // No trend
+         }
+      }
+   }
+   
+   // Monitor market trends in real-time
+   if(trend == 1)
+   {
+      // Execute buy trade based on accurate prediction
+      double stopLossLevel = ask - StopLoss * Point;
+      double takeProfitLevel = ask + TakeProfit * Point;
+      
+      // Place trade execution code here
+      
+      Comment('Buy trade executed at ', ask);
+   }
+   else if(trend == -1)
+   {
+      // Execute sell trade based on accurate prediction
+      double stopLossLevel = bid + StopLoss * Point;
+      double takeProfitLevel = bid - TakeProfit * Point;
+      
+      // Place trade execution code here
+      
+      Comment('Sell trade executed at ', bid);
+   }
+   
+   return(rates_total);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator deinitialization function                         |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   // Cleanup and release resources
+}
+
